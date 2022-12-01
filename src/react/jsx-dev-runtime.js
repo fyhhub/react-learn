@@ -1,0 +1,1 @@
+export { jsxDEV } from 'react/src/jsx/ReactJSXElement.js'
