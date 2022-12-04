@@ -1,7 +1,8 @@
 import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
-
+import { shouldSetTextContent } from 'react-dom-bindings/src/ReactDOMHostConfig'
+import { indent } from 'shared/logger'
 function reconcileChildren(current, workInProgress, nextChildren) {
   // 没有老fiber 说明是新创建的
   if (current == null) {
@@ -13,10 +14,14 @@ function reconcileChildren(current, workInProgress, nextChildren) {
 }
 
 function updateHostRoot(current, workInProgress) {
+  // 处理更新队列，会合并更新
   processUpdateQueue(workInProgress)
+  // 获取最新的state
   const nextState = workInProgress.memoizedState
+  // 获取最新state中的子节点
   const nextChildren = nextState.element
-  debugger
+
+  // 调和子节点，创建子fiber
   reconcileChildren(current, workInProgress, nextChildren)
 
   // 开启下一个子节点的任务
@@ -24,11 +29,26 @@ function updateHostRoot(current, workInProgress) {
 }
 
 function updateHostComponent(current, workInProgress) {
+  const { type, pendingProps } = workInProgress
 
+  // 获取最新的props
+  const nextProps = pendingProps
+
+  let nextChildren = nextProps.children
+  const isDirectTextChild = shouldSetTextContent(type, nextProps)
+
+  if (isDirectTextChild) {
+    nextChildren = null
+  }
+
+  reconcileChildren(current, workInProgress, nextChildren)
+
+  return workInProgress.child
 }
 
 export function beginWork(current, workInProgress) {
-  console.log('beginWork', workInProgress);
+  console.log(' '.repeat(indent.number) + 'beginWork', workInProgress.type, workInProgress);
+  indent.number += 2
   switch (workInProgress.tag) {
     case HostRoot:
       return updateHostRoot(current, workInProgress)

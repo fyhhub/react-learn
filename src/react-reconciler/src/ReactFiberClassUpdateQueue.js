@@ -56,7 +56,6 @@ export function processUpdateQueue(workInProgress) {
     while(update) {
       // 根据老状态更新
       newState = getStateFromUpdate(update, newState)
-      console.log("%c Line:59 🍭 newState", "color:#e41a6a", newState);
       update = update.next
     }
     workInProgress.memoizedState = newState

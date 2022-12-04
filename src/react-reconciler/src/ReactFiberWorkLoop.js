@@ -1,6 +1,7 @@
 import { scheduleCallback } from 'scheduler'
 import { createWorkInProgress } from './ReactFiber'
 import { beginWork } from './ReactFiberBeginWork'
+import { completeWork } from './ReactFiberCompleteWork'
 let workInProgress = null
 
 
@@ -47,10 +48,31 @@ function performUnitOfWork(unitOfWork) {
 
   // 没有子节点
   if (next == null) {
-    // completeUnitOfWork(unitOfWork)
-    workInProgress = null
+    completeUnitOfWork(unitOfWork)
   } else {
     // 有子节点，就把子节点作为下一个工作单元
     workInProgress = next
   }
+}
+
+function completeUnitOfWork(unitOfWork) {
+  let completedWork = unitOfWork
+
+  do {
+    const current = completedWork.alternate
+    const returnFiber = completedWork.return
+    // 1. 先去完成自己
+    completeWork(current, completedWork)
+
+    // 2. 找兄弟节点, 去完成
+    const siblingFiber = completedWork.sibling
+    if (siblingFiber != null) {
+      workInProgress = siblingFiber
+      return
+    }
+
+    // 3. 如果兄弟节点都处理完了，就完成父fiber
+    completedWork = returnFiber
+    workInProgress = completedWork
+  } while(completedWork != null)
 }
