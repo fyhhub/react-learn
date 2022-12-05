@@ -27,8 +27,8 @@ function prepareFreshStack(root) {
 }
 
 function renderRootSync(root) {
+  // 创建一个新的根fiber
   prepareFreshStack(root)
-
   workLoopSync()
 }
 

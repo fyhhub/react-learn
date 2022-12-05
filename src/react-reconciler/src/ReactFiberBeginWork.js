@@ -52,7 +52,6 @@ export function beginWork(current, workInProgress) {
   switch (workInProgress.tag) {
     case HostRoot:
       return updateHostRoot(current, workInProgress)
-
     case HostComponent:
       return updateHostComponent(current, workInProgress)
     case HostText:
